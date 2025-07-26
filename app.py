@@ -31,13 +31,15 @@ class IPLoggerHandler(BaseHTTPRequestHandler):
         self.end_headers()
         html = """
         <html>
-        <head><title>My Everyday Blog</title></head>
-        <body style="font-family: Arial; text-align: center; padding: 50px;">
-            <h1>Oops!</h1>
-            <p>Sorry, something went wrong loading this page.</p>
-            <p><small>Try again later.</small></p>
-        </body>
-        </html>
+<head><title>My Everyday Blog</title></head>
+<body style="font-family: Arial; text-align: center; padding: 50px;">
+    <h1>Oops!</h1>
+    <p>Sorry, something went wrong loading this page.</p>
+    <p><small>Try again later.</small></p>
+    <hr style="margin-top:40px;">
+    <p style="color:gray; font-size:12px;">Created by <b>kchiong</b></p>
+</body>
+</html>
         """
         self.wfile.write(html.encode('utf-8'))
 
