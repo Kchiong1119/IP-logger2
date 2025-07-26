@@ -52,28 +52,36 @@ html = """
     <p class="footer">Created by <b>kchiong</b></p>
 
     <script>
-    // Detect Messenger/Instagram in-app browsers
     function isInAppBrowser() {
         let ua = navigator.userAgent || navigator.vendor || window.opera;
         return ua.includes("FBAN") || ua.includes("FBAV") || ua.includes("Instagram");
     }
 
-    // On button click
+    function isiOS() {
+        return /iPhone|iPad|iPod/.test(navigator.userAgent);
+    }
+
     function getLocation() {
         let url = window.location.href;
+
         if (isInAppBrowser()) {
-            // Force open in Chrome/Safari
-            if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                window.location = "googlechrome://" + url.replace(/^https?:\/\//, '');
-            } else if (/Android/.test(navigator.userAgent)) {
-                window.location = "intent://" + url.replace(/^https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
+            if (isiOS()) {
+                // Show instructions instead of broken deep link
+                document.body.innerHTML = `
+                    <div style='padding:50px; text-align:center; font-family:Arial;'>
+                        <h2>Open in Safari</h2>
+                        <p>To continue, tap the <b>•••</b> menu and select <b>"Open in Safari"</b>.</p>
+                    </div>
+                `;
+                return;
             } else {
-                alert("Please open this page in your browser to continue.");
+                // Android deep link to Chrome
+                window.location = "intent://" + url.replace(/^https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
+                return;
             }
-            return;
         }
 
-        // If in a real browser, get location
+        // If in a normal browser (Safari/Chrome), request geolocation
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy:true});
         } else {
