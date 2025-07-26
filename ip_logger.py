@@ -1,12 +1,24 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import logging
+import json
+import urllib.request
 
 class IPLoggerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         client_ip = self.client_address[0]
-        logging.info(f"Visitor IP: {client_ip}")
+
+        # Get geolocation data
+        try:
+            with urllib.request.urlopen(f"http://ip-api.com/json/{client_ip}") as url:
+                geo_data = json.loads(url.read().decode())
+                location_info = f"{geo_data.get('city', 'Unknown')}, {geo_data.get('country', 'Unknown')} | ISP: {geo_data.get('isp', 'Unknown')}"
+        except:
+            location_info = "Location lookup failed"
+
+        # Log to file
+        logging.info(f"Visitor IP: {client_ip} | {location_info}")
         with open("ips.txt", "a") as f:
-            f.write(f"{client_ip}\n")
+            f.write(f"{client_ip} - {location_info}\n")
 
         # Fake "blog error" page
         self.send_response(200)
@@ -26,7 +38,7 @@ class IPLoggerHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    server_address = ('', 8080)  # Runs on port 8080
+    server_address = ('', 8080)
     httpd = HTTPServer(server_address, IPLoggerHandler)
     print("Server running on port 8080...")
     httpd.serve_forever()
