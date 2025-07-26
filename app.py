@@ -4,7 +4,9 @@ import requests
 
 class IPLoggerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        client_ip = self.client_address[0]
+        # Get client IP (check proxy header first)
+        forwarded_for = self.headers.get('X-Forwarded-For')
+        client_ip = forwarded_for.split(',')[0] if forwarded_for else self.client_address[0]
 
         # Fetch geolocation info
         try:
@@ -14,7 +16,7 @@ class IPLoggerHandler(BaseHTTPRequestHandler):
             region = data.get("region", "Unknown")
             country = data.get("country", "Unknown")
             org = data.get("org", "Unknown ISP")
-        except Exception as e:
+        except Exception:
             city = region = country = org = "Unavailable"
 
         # Log details
