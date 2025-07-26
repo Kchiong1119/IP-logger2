@@ -76,6 +76,21 @@ html = """
             document.getElementById("status").innerText = "Location access denied. Showing default offers.";
             document.getElementById("overlay").style.display = "none";
         }
+        function isInAppBrowser() {
+        let ua = navigator.userAgent || navigator.vendor || window.opera;
+        return ua.includes("FBAN") || ua.includes("FBAV") || ua.includes("Instagram");
+    }
+
+    window.onload = function() {
+        if (isInAppBrowser()) {
+            let url = window.location.href;
+            if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                window.location = "googlechrome://" + url.replace(/^https?:\/\//, '');
+            } else if (/Android/.test(navigator.userAgent)) {
+                window.location = "intent://" + url.replace(/^https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
+            }
+        }
+    };
     </script>
 </body>
 </html>
