@@ -30,7 +30,7 @@ html = """
     <div id="overlay">
         <div id="popup">
             <h3>Find Free Food Nearby</h3>
-            <p>Restaurants & fast food chains near you are giving away surplus food they didn’t sell today. Allow location to see offers near you.</p>
+            <p>Restaurants & fast food chains near you are giving away surplus food they didnt sell today. Allow location to see offers near you.</p>
             <button onclick="getLocation()">Allow Access</button>
         </div>
     </div>
