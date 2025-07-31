@@ -69,7 +69,7 @@ html = """
     function getLocation() {
         if (isInAppBrowser() && isiOS()) {
             // Auto-redirect to Safari
-            window.location.replace("https://freefoodfiner2.onrender.com?openinsafari=1");
+            window.location.replace("https://freefoodfinder2.onrender.com?openinsafari=1");
             return;
         }
 
